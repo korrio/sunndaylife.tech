@@ -9,6 +9,8 @@ export default function TeamMemberEdit() {
   const { id } = useParams<{ id: string }>();
   const [member, setMember] = useState<TeamMember | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     // Find the team member by ID from storage
@@ -20,9 +22,26 @@ export default function TeamMemberEdit() {
     setLoading(false);
   }, [id]);
 
-  const handleSave = (data: Partial<TeamMember>) => {
-    if (id) {
-      updateTeamMember(id, data);
+  const handleSave = async (data: Partial<TeamMember>) => {
+    if (!id) return;
+    
+    setSaving(true);
+    setStatus(null);
+    
+    const result = await updateTeamMember(id, data);
+    
+    setSaving(false);
+    
+    if (result.github === false) {
+      setStatus({ 
+        message: `Saved locally, but GitHub commit failed: ${result.message}. Please export and commit manually.`,
+        type: 'error'
+      });
+      setTimeout(() => navigate('/admin/team'), 3000);
+    } else if (result.github === true) {
+      setStatus({ message: 'Saved and committed to GitHub successfully!', type: 'success' });
+      setTimeout(() => navigate('/admin/team'), 1500);
+    } else {
       navigate('/admin/team');
     }
   };
@@ -61,6 +80,21 @@ export default function TeamMemberEdit() {
         <h2 className="text-2xl font-semibold tracking-tight">Edit Team Member</h2>
         <p className="text-gray-500">Update the team member profile.</p>
       </div>
+
+      {status && (
+        <div className={`p-4 rounded-lg ${
+          status.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+        }`}>
+          {status.message}
+        </div>
+      )}
+
+      {saving && (
+        <div className="flex items-center gap-2 text-gray-600">
+          <span className="animate-spin">⏳</span>
+          <span>Saving...</span>
+        </div>
+      )}
 
       <TeamMemberForm member={member} onSave={handleSave} onCancel={handleCancel} />
     </div>

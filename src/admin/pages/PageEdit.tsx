@@ -60,6 +60,8 @@ export default function PageEdit() {
   const { id } = useParams<{ id: string }>();
   const [page, setPage] = useState<PageContent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -71,14 +73,32 @@ export default function PageEdit() {
     setLoading(false);
   }, [id]);
 
-  const handleSave = (data: Partial<PageContent>) => {
-    if (id && page) {
-      const updatedPage: PageContent = {
-        ...page,
-        ...data,
-        updatedAt: new Date().toISOString()
-      };
-      savePage(id, updatedPage);
+  const handleSave = async (data: Partial<PageContent>) => {
+    if (!id || !page) return;
+    
+    setSaving(true);
+    setStatus(null);
+    
+    const updatedPage: PageContent = {
+      ...page,
+      ...data,
+      updatedAt: new Date().toISOString()
+    };
+    
+    const result = await savePage(id, updatedPage);
+    
+    setSaving(false);
+    
+    if (result.github === false) {
+      setStatus({ 
+        message: `Saved locally, but GitHub commit failed: ${result.message}. Please export and commit manually.`,
+        type: 'error'
+      });
+      setTimeout(() => navigate('/admin/pages'), 3000);
+    } else if (result.github === true) {
+      setStatus({ message: 'Saved and committed to GitHub successfully!', type: 'success' });
+      setTimeout(() => navigate('/admin/pages'), 1500);
+    } else {
       navigate('/admin/pages');
     }
   };
@@ -117,6 +137,21 @@ export default function PageEdit() {
         <h2 className="text-2xl font-semibold tracking-tight">Edit Page</h2>
         <p className="text-gray-500">Update the {page.title} content and settings.</p>
       </div>
+
+      {status && (
+        <div className={`p-4 rounded-lg ${
+          status.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+        }`}>
+          {status.message}
+        </div>
+      )}
+
+      {saving && (
+        <div className="flex items-center gap-2 text-gray-600">
+          <span className="animate-spin">⏳</span>
+          <span>Saving...</span>
+        </div>
+      )}
 
       <PageForm page={page} onSave={handleSave} onCancel={handleCancel} />
     </div>

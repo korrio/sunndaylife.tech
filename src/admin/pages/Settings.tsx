@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Textarea } from '@/components/ui/Textarea';
 import { Badge } from '@/components/ui/Badge';
-import { Globe, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, X, Plus } from 'lucide-react';
+import { 
+  Globe, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, 
+  X, Plus, Github, Check, AlertCircle, Rocket 
+} from 'lucide-react';
+import { testGitHubConnection, triggerVercelDeploy } from '@/lib/github';
 
 interface SiteSettings {
   siteName: string;
@@ -23,9 +27,16 @@ interface SiteSettings {
     description: string;
     keywords: string[];
   };
+  // GitHub Integration
+  githubToken: string;
+  githubOwner: string;
+  githubRepo: string;
+  githubBranch: string;
+  // Vercel Integration
+  vercelDeployHook: string;
 }
 
-const initialSettings: SiteSettings = {
+const defaultSettings: SiteSettings = {
   siteName: 'Sunny Day 365',
   tagline: 'Professional IT & Smart Solutions',
   contactEmail: 'contact@sunnydaylife.tech',
@@ -40,19 +51,54 @@ const initialSettings: SiteSettings = {
     title: 'Sunny Day 365 - Professional IT Services',
     description: 'Professional IT & Smart Solutions with more than 10 years of experience in international organizations.',
     keywords: ['IT Services', 'Thailand', 'Virtual IT Department', 'ISO Compliance']
-  }
+  },
+  githubToken: '',
+  githubOwner: 'korrio',
+  githubRepo: 'sunndaylife.tech',
+  githubBranch: 'main',
+  vercelDeployHook: ''
 };
 
 export default function Settings() {
-  const [settings, setSettings] = useState<SiteSettings>(initialSettings);
+  const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
   const [newKeyword, setNewKeyword] = useState('');
   const [saved, setSaved] = useState(false);
+  const [githubStatus, setGithubStatus] = useState<{ testing: boolean; success?: boolean; message?: string } | null>(null);
+  const [deployStatus, setDeployStatus] = useState<{ deploying: boolean; success?: boolean; message?: string } | null>(null);
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('sunnyday_settings');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setSettings({ ...defaultSettings, ...parsed });
+        } catch (e) {
+          console.error('Error parsing settings:', e);
+        }
+      }
+    }
+  }, []);
 
   const handleSave = () => {
-    console.log('Saving settings:', settings);
-    // TODO: Implement actual save
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sunnyday_settings', JSON.stringify(settings));
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const testGitHub = async () => {
+    setGithubStatus({ testing: true });
+    const result = await testGitHubConnection();
+    setGithubStatus({ testing: false, ...result });
+  };
+
+  const triggerDeploy = async () => {
+    setDeployStatus({ deploying: true });
+    const result = await triggerVercelDeploy();
+    setDeployStatus({ deploying: false, ...result });
   };
 
   const addKeyword = () => {
@@ -174,9 +220,7 @@ export default function Settings() {
       {/* Social Links */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Social Links
-          </CardTitle>
+          <CardTitle>Social Links</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -227,6 +271,169 @@ export default function Settings() {
         </CardContent>
       </Card>
 
+      {/* GitHub Integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Github className="h-5 w-5" />
+            GitHub Integration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-700">
+              <strong>Auto-Commit Feature:</strong> When enabled, content changes will automatically 
+              be committed to your GitHub repository. You'll need a 
+              <a 
+                href="https://github.com/settings/tokens" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline ml-1"
+              >
+                Personal Access Token
+              </a>
+              with <code>repo</code> scope.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="githubToken">GitHub Personal Access Token</Label>
+            <Input
+              id="githubToken"
+              type="password"
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              value={settings.githubToken}
+              onChange={(e) => setSettings({ ...settings, githubToken: e.target.value })}
+            />
+            <p className="text-xs text-gray-500">
+              Token with repo scope. Never share this token!
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="githubOwner">Repository Owner</Label>
+              <Input
+                id="githubOwner"
+                placeholder="yourusername"
+                value={settings.githubOwner}
+                onChange={(e) => setSettings({ ...settings, githubOwner: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="githubRepo">Repository Name</Label>
+              <Input
+                id="githubRepo"
+                placeholder="my-website"
+                value={settings.githubRepo}
+                onChange={(e) => setSettings({ ...settings, githubRepo: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="githubBranch">Branch</Label>
+              <Input
+                id="githubBranch"
+                placeholder="main"
+                value={settings.githubBranch}
+                onChange={(e) => setSettings({ ...settings, githubBranch: e.target.value })}
+              />
+            </div>
+          </div>
+
+          {githubStatus && (
+            <div className={`flex items-center gap-2 p-3 rounded-lg ${
+              githubStatus.testing 
+                ? 'bg-gray-100' 
+                : githubStatus.success 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+            }`}>
+              {githubStatus.testing ? (
+                <span className="animate-spin">⏳</span>
+              ) : githubStatus.success ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <AlertCircle className="h-4 w-4" />
+              )}
+              <span className="text-sm">{githubStatus.message}</span>
+            </div>
+          )}
+
+          <Button 
+            variant="outline" 
+            onClick={testGitHub}
+            disabled={!settings.githubToken || !settings.githubOwner || !settings.githubRepo}
+          >
+            Test GitHub Connection
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Vercel Integration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Rocket className="h-5 w-5" />
+            Vercel Integration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-700">
+              <strong>Deploy Hook:</strong> Optional. Add a 
+              <a 
+                href="https://vercel.com/docs/concepts/git/deploy-hooks" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="underline mx-1"
+              >
+                Vercel Deploy Hook
+              </a>
+              URL to manually trigger redeploys from the admin panel.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="vercelDeployHook">Deploy Hook URL</Label>
+            <Input
+              id="vercelDeployHook"
+              type="password"
+              placeholder="https://api.vercel.com/v1/integrations/deploy/..."
+              value={settings.vercelDeployHook}
+              onChange={(e) => setSettings({ ...settings, vercelDeployHook: e.target.value })}
+            />
+          </div>
+
+          {deployStatus && (
+            <div className={`flex items-center gap-2 p-3 rounded-lg ${
+              deployStatus.deploying 
+                ? 'bg-gray-100' 
+                : deployStatus.success 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+            }`}>
+              {deployStatus.deploying ? (
+                <span className="animate-spin">⏳</span>
+              ) : deployStatus.success ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <AlertCircle className="h-4 w-4" />
+              )}
+              <span className="text-sm">{deployStatus.message}</span>
+            </div>
+          )}
+
+          <Button 
+            variant="outline" 
+            onClick={triggerDeploy}
+            disabled={!settings.vercelDeployHook}
+          >
+            <Rocket className="h-4 w-4 mr-2" />
+            Trigger Vercel Redeploy
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* SEO Settings */}
       <Card>
         <CardHeader>
@@ -243,9 +450,6 @@ export default function Settings() {
                 seo: { ...settings.seo, title: e.target.value }
               })}
             />
-            <p className="text-xs text-gray-500">
-              Used as fallback for pages without custom titles
-            </p>
           </div>
 
           <div className="space-y-2">
@@ -259,9 +463,6 @@ export default function Settings() {
               })}
               rows={3}
             />
-            <p className="text-xs text-gray-500">
-              Recommended: 150-160 characters
-            </p>
           </div>
 
           <div className="space-y-2">

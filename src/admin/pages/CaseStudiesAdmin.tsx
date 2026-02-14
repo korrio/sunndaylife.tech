@@ -1,12 +1,28 @@
 import { Button } from '@/components/ui/Button';
 import { ContentTable } from '../components/ContentTable';
 import { Link } from 'react-router-dom';
-import { Plus, Download, RotateCcw } from 'lucide-react';
+import { Plus, Download, RotateCcw, Github } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCaseStudies, exportContentFiles, downloadFile, deleteCaseStudy } from '@/lib/storage';
 
 export default function CaseStudiesAdmin() {
   const [caseStudies, setCaseStudies] = useState(getCaseStudies());
+  const [githubStatus, setGithubStatus] = useState<{ configured: boolean; owner?: string; repo?: string } | null>(null);
+
+  // Check GitHub config on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('sunnyday_settings');
+    if (stored) {
+      const settings = JSON.parse(stored);
+      setGithubStatus({
+        configured: !!(settings.githubToken && settings.githubOwner && settings.githubRepo),
+        owner: settings.githubOwner,
+        repo: settings.githubRepo
+      });
+    } else {
+      setGithubStatus({ configured: false });
+    }
+  }, []);
 
   // Refresh data when component mounts
   useEffect(() => {
@@ -33,8 +49,8 @@ export default function CaseStudiesAdmin() {
     setCaseStudies(getCaseStudies());
   };
 
-  const handleDelete = (id: string) => {
-    deleteCaseStudy(id);
+  const handleDelete = async (id: string) => {
+    await deleteCaseStudy(id);
     setCaseStudies(getCaseStudies());
   };
 
@@ -63,20 +79,55 @@ export default function CaseStudiesAdmin() {
         </div>
       </div>
 
+      {/* GitHub Status */}
+      {githubStatus && (
+        <div className={`flex items-center gap-2 p-3 rounded-lg ${
+          githubStatus.configured 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-yellow-100 text-yellow-800'
+        }`}>
+          <Github className="h-4 w-4" />
+          <span className="text-sm">
+            {githubStatus.configured 
+              ? `Auto-commit enabled: ${githubStatus.owner}/${githubStatus.repo}` 
+              : 'GitHub auto-commit not configured. Changes will be saved locally only.'}
+          </span>
+          {!githubStatus.configured && (
+            <Button variant="outline" size="sm" className="ml-auto" asChild>
+              <Link to="/admin/settings">Configure</Link>
+            </Button>
+          )}
+        </div>
+      )}
+
       <ContentTable items={items} basePath="/admin/case-studies" onDelete={handleDelete} />
 
-      {/* Persistence Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-1">💡 Data Persistence</h4>
-        <p className="text-sm text-blue-700">
-          Changes are saved to your browser's localStorage. To make them permanent:
-        </p>
-        <ol className="text-sm text-blue-700 mt-2 ml-4 list-decimal">
-          <li>Edit and save your content</li>
-          <li>Click "Export" to download the updated TypeScript file</li>
-          <li>Replace the file in <code>src/content/case-studies.ts</code></li>
-          <li>Commit and push to GitHub</li>
-        </ol>
+      {/* Info Cards */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {githubStatus?.configured ? (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 mb-2">🚀 Auto-Commit Enabled</h4>
+            <p className="text-sm text-blue-700">
+              Changes are automatically committed to GitHub. Vercel will rebuild the site 
+              with the new content.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 mb-2">💡 Manual Export</h4>
+            <p className="text-sm text-blue-700">
+              Configure GitHub in Settings for auto-commit, or click "Export" to download 
+              TypeScript files and commit them manually.
+            </p>
+          </div>
+        )}
+
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="font-medium mb-2">📊 Stats</h4>
+          <p className="text-sm text-gray-600">
+            {caseStudies.length} case studies • {caseStudies.filter(cs => cs.published).length} published
+          </p>
+        </div>
       </div>
     </div>
   );
