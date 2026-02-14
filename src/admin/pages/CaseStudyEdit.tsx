@@ -1,16 +1,18 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { CaseStudyForm } from '../components/CaseStudyForm';
-import { caseStudies } from '@/content/case-studies';
+import { getCaseStudies, updateCaseStudy } from '@/lib/storage';
 import { useEffect, useState } from 'react';
+import type { CaseStudy } from '@/types';
 
 export default function CaseStudyEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [caseStudy, setCaseStudy] = useState<typeof caseStudies[0] | null>(null);
+  const [caseStudy, setCaseStudy] = useState<CaseStudy | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Find the case study by ID
+    // Find the case study by ID from storage
+    const caseStudies = getCaseStudies();
     const found = caseStudies.find(cs => cs.id === id);
     if (found) {
       setCaseStudy(found);
@@ -18,12 +20,11 @@ export default function CaseStudyEdit() {
     setLoading(false);
   }, [id]);
 
-  const handleSave = (data: Partial<import('@/types').CaseStudy>) => {
-    console.log('Updating case study:', data);
-    
-    // TODO: Implement actual save logic
-    alert('Case study updated! (Demo mode - changes not persisted)');
-    navigate('/admin/case-studies');
+  const handleSave = (data: Partial<CaseStudy>) => {
+    if (id) {
+      updateCaseStudy(id, data);
+      navigate('/admin/case-studies');
+    }
   };
 
   const handleCancel = () => {

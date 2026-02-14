@@ -1,16 +1,18 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { TeamMemberForm } from '../components/TeamMemberForm';
-import { teamMembers } from '@/content/team';
+import { getTeamMembers, updateTeamMember } from '@/lib/storage';
 import { useEffect, useState } from 'react';
+import type { TeamMember } from '@/types';
 
 export default function TeamMemberEdit() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const [member, setMember] = useState<typeof teamMembers[0] | null>(null);
+  const [member, setMember] = useState<TeamMember | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Find the team member by ID
+    // Find the team member by ID from storage
+    const teamMembers = getTeamMembers();
     const found = teamMembers.find(m => m.id === id);
     if (found) {
       setMember(found);
@@ -18,12 +20,11 @@ export default function TeamMemberEdit() {
     setLoading(false);
   }, [id]);
 
-  const handleSave = (data: Partial<import('@/types').TeamMember>) => {
-    console.log('Updating team member:', data);
-    
-    // TODO: Implement actual save logic
-    alert('Team member updated! (Demo mode - changes not persisted)');
-    navigate('/admin/team');
+  const handleSave = (data: Partial<TeamMember>) => {
+    if (id) {
+      updateTeamMember(id, data);
+      navigate('/admin/team');
+    }
   };
 
   const handleCancel = () => {

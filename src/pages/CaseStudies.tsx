@@ -1,13 +1,19 @@
 import { motion } from 'framer-motion';
 import { Section, Container } from '@/components/ui/Section';
 import { CaseStudyCard } from '@/components/CaseStudyCard';
-import { caseStudies } from '@/content/case-studies';
-import { useState } from 'react';
+import { getCaseStudies } from '@/lib/storage';
+import { useState, useEffect } from 'react';
 
 const categories = ['All', 'Overseas Project', 'Debt Collection', 'Compliance', 'Interim IT'];
 
 export default function CaseStudies() {
   const [activeCategory, setActiveCategory] = useState('All');
+  const [caseStudies, setCaseStudies] = useState(getCaseStudies());
+
+  // Refresh data when component mounts (to get latest from localStorage)
+  useEffect(() => {
+    setCaseStudies(getCaseStudies());
+  }, []);
 
   const filteredCaseStudies = activeCategory === 'All' 
     ? caseStudies 

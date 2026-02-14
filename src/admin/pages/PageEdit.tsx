@@ -1,14 +1,19 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageForm } from '../components/PageForm';
-import { homePage } from '@/content/pages';
+import { getPage, savePage } from '@/lib/storage';
+import { homePage as defaultHomePage } from '@/content/pages';
 import { useEffect, useState } from 'react';
 import type { PageContent } from '@/types';
 
-// Mock page data - in a real app, this would come from an API
+// Get page data from storage or defaults
 const getPageById = (id: string): PageContent | null => {
+  const stored = getPage(id);
+  if (stored) return stored;
+  
+  // Return defaults if not in storage
   switch (id) {
     case 'home':
-      return homePage;
+      return defaultHomePage;
     case 'about':
       return {
         id: 'about',
@@ -19,7 +24,7 @@ const getPageById = (id: string): PageContent | null => {
           description: 'Your trusted partner in professional IT solutions'
         },
         sections: [],
-        updatedAt: '2026-02-13T00:00:00.000Z'
+        updatedAt: new Date().toISOString()
       };
     case 'services':
       return {
@@ -31,7 +36,7 @@ const getPageById = (id: string): PageContent | null => {
           description: 'Tailored IT solutions for your business needs'
         },
         sections: [],
-        updatedAt: '2026-02-13T00:00:00.000Z'
+        updatedAt: new Date().toISOString()
       };
     case 'contact':
       return {
@@ -43,7 +48,7 @@ const getPageById = (id: string): PageContent | null => {
           description: 'We\'d love to hear from you'
         },
         sections: [],
-        updatedAt: '2026-02-13T00:00:00.000Z'
+        updatedAt: new Date().toISOString()
       };
     default:
       return null;
@@ -67,11 +72,15 @@ export default function PageEdit() {
   }, [id]);
 
   const handleSave = (data: Partial<PageContent>) => {
-    console.log('Updating page:', data);
-    
-    // TODO: Implement actual save logic
-    alert('Page updated! (Demo mode - changes not persisted)');
-    navigate('/admin/pages');
+    if (id && page) {
+      const updatedPage: PageContent = {
+        ...page,
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      savePage(id, updatedPage);
+      navigate('/admin/pages');
+    }
   };
 
   const handleCancel = () => {

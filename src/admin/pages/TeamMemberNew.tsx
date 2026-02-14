@@ -1,14 +1,25 @@
 import { useNavigate } from 'react-router-dom';
 import { TeamMemberForm } from '../components/TeamMemberForm';
+import { addTeamMember } from '@/lib/storage';
+import type { TeamMember } from '@/types';
 
 export default function TeamMemberNew() {
   const navigate = useNavigate();
 
-  const handleSave = (data: Partial<import('@/types').TeamMember>) => {
-    console.log('Creating team member:', data);
-    
-    // TODO: Implement actual save logic
-    alert('Team member created! (Demo mode - changes not persisted)');
+  const handleSave = (data: Partial<TeamMember>) => {
+    // Ensure all required fields are present
+    const newMember: TeamMember = {
+      id: data.id || '',
+      name: data.name || '',
+      role: data.role || '',
+      bio: data.bio || '',
+      image: data.image || '/images/default.jpg',
+      specializations: data.specializations || [],
+      experiences: data.experiences || [],
+      order: Date.now(),
+    };
+
+    addTeamMember(newMember);
     navigate('/admin/team');
   };
 

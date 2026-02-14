@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
 import { Section, Container } from '@/components/ui/Section';
 import { TeamCard } from '@/components/TeamCard';
-import { teamMembers } from '@/content/team';
+import { getTeamMembers } from '@/lib/storage';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Award, Globe, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 const highlights = [
   { icon: Globe, title: "Global Experience", desc: "Worked across 5+ countries" },
@@ -13,6 +14,13 @@ const highlights = [
 ];
 
 export default function Team() {
+  const [teamMembers, setTeamMembers] = useState(getTeamMembers());
+
+  // Refresh data when component mounts
+  useEffect(() => {
+    setTeamMembers(getTeamMembers());
+  }, []);
+
   return (
     <>
       {/* Hero */}
@@ -80,59 +88,46 @@ export default function Team() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <span className="text-sunny-teal font-semibold text-sm uppercase tracking-wider">
-                Experience
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-6">
-                Phongsaphat's Background
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                International Experience
               </h2>
-              <div className="space-y-6">
-                <div className="border-l-4 border-sunny-teal pl-6">
-                  <h4 className="font-semibold text-gray-900">International Committee of the Red Cross (ICRC)</h4>
-                  <p className="text-sunny-teal text-sm">Service Desk | Service Manager | APAC</p>
-                  <p className="text-gray-600 mt-2">
-                    Led IT service management across Asia-Pacific region, managing critical 
-                    operations in challenging environments including Somalia, Kenya, and Myanmar.
-                  </p>
-                </div>
-                <div className="border-l-4 border-gray-300 pl-6">
-                  <h4 className="font-semibold text-gray-900">United Nations ILO</h4>
-                  <p className="text-sunny-teal text-sm">Assistant Manager</p>
-                  <p className="text-gray-600 mt-2">
-                    Contributed to international labor organization IT initiatives, 
-                    participating in discussions in Egypt and Serbia.
-                  </p>
-                </div>
-              </div>
+              <p className="text-gray-600 leading-relaxed mb-6">
+                Our team has worked in critical regions around the world, bringing a wealth of 
+                international experience to every project. From managing IT operations in Somalia, 
+                Kenya, and Myanmar to participating in international discussions in Egypt and Serbia, 
+                we understand the unique challenges of global IT deployments.
+              </p>
+              <ul className="space-y-3">
+                {['ICRC (International Committee of the Red Cross)', 'UN ILO (International Labour Organization)', 'Global logistics and supply chain', 'International compliance standards'].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-sunny-teal rounded-full" />
+                    <span className="text-gray-700">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
+              className="bg-gray-50 rounded-lg p-8"
             >
-              <span className="text-sunny-teal font-semibold text-sm uppercase tracking-wider">
-                Experience
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3 mb-6">
-                Sawee's Background
-              </h2>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Why Choose Our Team?
+              </h3>
               <div className="space-y-6">
-                <div className="border-l-4 border-sunny-teal pl-6">
-                  <h4 className="font-semibold text-gray-900">Homepro</h4>
-                  <p className="text-sunny-teal text-sm">System Engineer Manager</p>
-                  <p className="text-gray-600 mt-2">
-                    Managed system engineering teams and infrastructure for one of Thailand's 
-                    leading home improvement retailers.
-                  </p>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Owner-Driven Approach</h4>
+                  <p className="text-gray-600 text-sm">Direct involvement from leadership in every project ensures quality delivery.</p>
                 </div>
-                <div className="border-l-4 border-gray-300 pl-6">
-                  <h4 className="font-semibold text-gray-900">Media Plus</h4>
-                  <p className="text-sunny-teal text-sm">System Analyst</p>
-                  <p className="text-gray-600 mt-2">
-                    Analyzed and optimized system performance for media and broadcasting 
-                    technology infrastructure.
-                  </p>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Proven Track Record</h4>
+                  <p className="text-gray-600 text-sm">Successfully delivered projects across multiple industries and regions.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Continuous Learning</h4>
+                  <p className="text-gray-600 text-sm">Staying current with the latest technologies and best practices.</p>
                 </div>
               </div>
             </motion.div>
@@ -141,17 +136,16 @@ export default function Team() {
       </Section>
 
       {/* CTA */}
-      <Section variant="gradient">
+      <Section className="bg-sunny-teal">
         <Container>
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-              Want to Join Our Team?
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Work With Our Team
             </h2>
-            <p className="text-gray-700 text-lg mb-10">
-              We're always looking for talented individuals who are passionate about IT 
-              and delivering exceptional service to clients.
+            <p className="text-white/90 mb-8">
+              Let's discuss how our experienced team can help transform your IT operations.
             </p>
-            <Button size="lg" asChild>
+            <Button variant="white" size="lg" asChild>
               <Link to="/contact">
                 Get in Touch
                 <ArrowRight className="ml-2 w-5 h-5" />

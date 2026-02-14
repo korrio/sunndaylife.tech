@@ -1,17 +1,28 @@
 import { useNavigate } from 'react-router-dom';
 import { CaseStudyForm } from '../components/CaseStudyForm';
+import { addCaseStudy } from '@/lib/storage';
+import type { CaseStudy } from '@/types';
 
 export default function CaseStudyNew() {
   const navigate = useNavigate();
 
-  const handleSave = (data: Partial<import('@/types').CaseStudy>) => {
-    // In a real app, this would save to a database or API
-    // For now, we'll just log and navigate back
-    console.log('Creating case study:', data);
-    
-    // TODO: Implement actual save logic
-    // For now, show an alert that this is a demo
-    alert('Case study created! (Demo mode - changes not persisted)');
+  const handleSave = (data: Partial<CaseStudy>) => {
+    // Ensure all required fields are present
+    const newCaseStudy: CaseStudy = {
+      id: data.id || '',
+      title: data.title || '',
+      subtitle: data.subtitle || '',
+      description: data.description || '',
+      challenge: data.challenge || '',
+      solution: data.solution || '',
+      results: data.results || [],
+      image: data.image || '/images/default.jpg',
+      tags: data.tags || [],
+      order: Date.now(),
+      published: data.published ?? true,
+    };
+
+    addCaseStudy(newCaseStudy);
     navigate('/admin/case-studies');
   };
 

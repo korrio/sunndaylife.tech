@@ -8,22 +8,36 @@ import { Section, Container } from '@/components/ui/Section';
 import { Button } from '@/components/ui/Button';
 import { homePage, testimonials } from '@/content/pages';
 import { services } from '@/content/services';
-import { caseStudies } from '@/content/case-studies';
-import { teamMembers } from '@/content/team';
+import { getCaseStudies, getTeamMembers, getPage } from '@/lib/storage';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
-  const whoWeAre = homePage.sections.find(s => s.id === 'who-we-are');
-  const philosophy = homePage.sections.find(s => s.id === 'philosophy');
-  const cta = homePage.sections.find(s => s.id === 'cta');
+  const [caseStudies, setCaseStudies] = useState(getCaseStudies());
+  const [teamMembers, setTeamMembers] = useState(getTeamMembers());
+  const [pageData, setPageData] = useState(getPage('home') || homePage);
+
+  // Refresh data when component mounts
+  useEffect(() => {
+    setCaseStudies(getCaseStudies());
+    setTeamMembers(getTeamMembers());
+    const storedPage = getPage('home');
+    if (storedPage) {
+      setPageData(storedPage);
+    }
+  }, []);
+
+  const whoWeAre = pageData.sections.find(s => s.id === 'who-we-are');
+  const philosophy = pageData.sections.find(s => s.id === 'philosophy');
+  const cta = pageData.sections.find(s => s.id === 'cta');
 
   return (
     <>
       {/* Hero */}
       <Hero 
-        title={homePage.hero.title}
-        description={homePage.hero.description}
+        title={pageData.hero.title}
+        description={pageData.hero.description}
       />
 
       {/* Who We Are */}
@@ -102,32 +116,10 @@ export default function Home() {
         <Container>
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="order-2 lg:order-1"
-            >
-              <div className="bg-sunny-teal rounded-2xl p-8 text-white">
-                <blockquote className="text-2xl font-medium leading-relaxed">
-                  "{philosophy?.content.quote}"
-                </blockquote>
-                <div className="mt-6 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                    <span className="font-bold">SD</span>
-                  </div>
-                  <div>
-                    <div className="font-semibold">Sunny Day 365</div>
-                    <div className="text-white/70 text-sm">Our Philosophy</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="order-1 lg:order-2"
+              transition={{ duration: 0.6 }}
             >
               <span className="text-sunny-teal font-semibold text-sm uppercase tracking-wider">
                 {philosophy?.title}
@@ -153,26 +145,40 @@ export default function Home() {
                 ))}
               </div>
             </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="bg-gray-50 rounded-lg p-8"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                Business First, Technology Second
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                We believe that IT should serve the business, not the other way around. 
+                Our approach focuses on understanding your business needs first, then 
+                designing technology solutions that drive real value and growth.
+              </p>
+            </motion.div>
           </div>
         </Container>
       </Section>
 
-      {/* Case Studies */}
-      <Section className="bg-gray-50">
+      {/* Case Studies Preview */}
+      <Section className="bg-sunny-teal">
         <Container>
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
             <div>
-              <span className="text-sunny-teal font-semibold text-sm uppercase tracking-wider">
+              <span className="text-white/80 font-semibold text-sm uppercase tracking-wider">
                 Our Work
               </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mt-3">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mt-3">
                 Our Latest Projects
               </h2>
-              <p className="text-gray-600 mt-4 max-w-2xl">
-                Discover how we've helped businesses transform their IT operations
-              </p>
             </div>
-            <Button variant="outline" className="mt-6 md:mt-0" asChild>
+            <Button variant="outline" className="mt-4 md:mt-0 border-white text-white hover:bg-white hover:text-sunny-teal" asChild>
               <Link to="/case-studies">
                 View All Projects
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -193,7 +199,7 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* Team */}
+      {/* Team Preview */}
       <Section>
         <Container>
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -237,29 +243,27 @@ export default function Home() {
       </Section>
 
       {/* CTA */}
-      <Section variant="gradient">
+      <Section>
         <Container>
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-sunny-teal rounded-2xl p-12 text-center"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               {cta?.content.heading}
             </h2>
-            <p className="text-gray-700 text-lg mb-10">
+            <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
               {cta?.content.description}
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link to="/contact">
-                  {cta?.content.buttonText}
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg" className="border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white" asChild>
-                <Link to="/services">
-                  Explore Services
-                </Link>
-              </Button>
-            </div>
-          </div>
+            <Button variant="white" size="lg" asChild>
+              <Link to={cta?.content.buttonLink || '/contact'}>
+                {cta?.content.buttonText}
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+            </Button>
+          </motion.div>
         </Container>
       </Section>
     </>

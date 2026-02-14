@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Trash2 } from 'lucide-react';
 
 interface ContentItem {
   id: string;
@@ -13,9 +14,16 @@ interface ContentItem {
 interface ContentTableProps {
   items: ContentItem[];
   basePath: string;
+  onDelete?: (id: string) => void;
 }
 
-export function ContentTable({ items, basePath }: ContentTableProps) {
+export function ContentTable({ items, basePath, onDelete }: ContentTableProps) {
+  const handleDelete = (id: string, title: string) => {
+    if (confirm(`Are you sure you want to delete "${title}"?`)) {
+      onDelete?.(id);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <table className="w-full text-sm">
@@ -45,9 +53,21 @@ export function ContentTable({ items, basePath }: ContentTableProps) {
               </td>
               <td className="px-6 py-4 text-gray-500">{item.updatedAt}</td>
               <td className="px-6 py-4 text-right">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to={`${basePath}/${item.id}/edit`}>Edit</Link>
-                </Button>
+                <div className="flex items-center justify-end gap-2">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link to={`${basePath}/${item.id}/edit`}>Edit</Link>
+                  </Button>
+                  {onDelete && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDelete(item.id, item.title)}
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

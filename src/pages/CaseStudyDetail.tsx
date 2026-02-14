@@ -3,11 +3,19 @@ import { motion } from 'framer-motion';
 import { Section, Container } from '@/components/ui/Section';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { caseStudies } from '@/content/case-studies';
+import { getCaseStudies } from '@/lib/storage';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function CaseStudyDetail() {
   const { id } = useParams<{ id: string }>();
+  const [caseStudies, setCaseStudies] = useState(getCaseStudies());
+  
+  // Refresh data when component mounts
+  useEffect(() => {
+    setCaseStudies(getCaseStudies());
+  }, []);
+  
   const caseStudy = caseStudies.find(cs => cs.id === id);
 
   if (!caseStudy) {
