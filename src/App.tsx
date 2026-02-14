@@ -12,6 +12,8 @@ import Contact from '@/pages/Contact';
 // Admin
 import { AdminLayout } from '@/admin/components/AdminLayout';
 import AdminDashboard from '@/admin/pages/Dashboard';
+import PagesAdmin from '@/admin/pages/PagesAdmin';
+import PageEdit from '@/admin/pages/PageEdit';
 import CaseStudiesAdmin from '@/admin/pages/CaseStudiesAdmin';
 import CaseStudyNew from '@/admin/pages/CaseStudyNew';
 import CaseStudyEdit from '@/admin/pages/CaseStudyEdit';
@@ -19,6 +21,7 @@ import TeamAdmin from '@/admin/pages/TeamAdmin';
 import TeamMemberNew from '@/admin/pages/TeamMemberNew';
 import TeamMemberEdit from '@/admin/pages/TeamMemberEdit';
 import MediaAdmin from '@/admin/pages/MediaAdmin';
+import Settings from '@/admin/pages/Settings';
 
 function App() {
   return (
@@ -27,7 +30,8 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
-          <Route path="pages" element={<div>Pages Admin (Coming Soon)</div>} />
+          <Route path="pages" element={<PagesAdmin />} />
+          <Route path="pages/:id/edit" element={<PageEdit />} />
           <Route path="case-studies" element={<CaseStudiesAdmin />} />
           <Route path="case-studies/new" element={<CaseStudyNew />} />
           <Route path="case-studies/:id/edit" element={<CaseStudyEdit />} />
@@ -35,7 +39,7 @@ function App() {
           <Route path="team/new" element={<TeamMemberNew />} />
           <Route path="team/:id/edit" element={<TeamMemberEdit />} />
           <Route path="media" element={<MediaAdmin />} />
-          <Route path="settings" element={<div>Settings (Coming Soon)</div>} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* Public Routes */}
