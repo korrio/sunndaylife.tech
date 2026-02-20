@@ -3,11 +3,14 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import Home from '@/pages/Home';
 import About from '@/pages/About';
+import Background from '@/pages/Background';
 import Services from '@/pages/Services';
 import CaseStudies from '@/pages/CaseStudies';
 import CaseStudyDetail from '@/pages/CaseStudyDetail';
 import Team from '@/pages/Team';
 import Contact from '@/pages/Contact';
+import News from '@/pages/News';
+import NewsDetail from '@/pages/NewsDetail';
 
 // Admin
 import { AdminLayout } from '@/admin/components/AdminLayout';
@@ -50,10 +53,13 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/background" element={<Background />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/case-studies" element={<CaseStudies />} />
                 <Route path="/case-studies/:id" element={<CaseStudyDetail />} />
                 <Route path="/team" element={<Team />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/news/:id" element={<NewsDetail />} />
                 <Route path="/contact" element={<Contact />} />
               </Routes>
             </main>

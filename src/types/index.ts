@@ -121,6 +121,22 @@ export interface Testimonial {
   rating?: number;
 }
 
+// News Item Type
+export interface NewsItem {
+  id: string;
+  title: string;
+  titleTh: string;
+  excerpt: string;
+  excerptTh: string;
+  content: string;
+  contentTh: string;
+  image: string;
+  category: string;
+  categoryTh: string;
+  date: string;
+  featured: boolean;
+}
+
 // Language Type
 export type Language = 'en' | 'th';
 
