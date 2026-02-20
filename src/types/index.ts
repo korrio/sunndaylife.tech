@@ -2,13 +2,19 @@
 export interface TeamMember {
   id: string;
   name: string;
+  nameTh?: string;
   role: string;
+  roleTh?: string;
   bio: string;
+  bioTh?: string;
   image: string;
   specializations: string[];
+  specializationsTh?: string[];
   experiences: {
     organization: string;
+    organizationTh?: string;
     role: string;
+    roleTh?: string;
     scope?: string;
   }[];
   order: number;
@@ -18,13 +24,20 @@ export interface TeamMember {
 export interface CaseStudy {
   id: string;
   title: string;
+  titleTh?: string;
   subtitle: string;
+  subtitleTh?: string;
   description: string;
+  descriptionTh?: string;
   challenge: string;
+  challengeTh?: string;
   solution: string;
+  solutionTh?: string;
   results: string[];
+  resultsTh?: string[];
   image: string;
   tags: string[];
+  tagsTh?: string[];
   order: number;
   published: boolean;
 }
@@ -33,9 +46,13 @@ export interface CaseStudy {
 export interface Service {
   id: string;
   title: string;
+  titleTh?: string;
   description: string;
+  descriptionTh?: string;
   icon: string;
   features?: string[];
+  featuresTh?: string[];
+  image?: string;
 }
 
 // Page Section Type
@@ -43,6 +60,7 @@ export interface PageSection {
   id: string;
   type: 'hero' | 'text' | 'stats' | 'services' | 'testimonials' | 'team' | 'case-studies' | 'cta';
   title?: string;
+  titleTh?: string;
   content: any;
 }
 
@@ -50,11 +68,16 @@ export interface PageSection {
 export interface PageContent {
   id: string;
   title: string;
+  titleTh?: string;
   subtitle?: string;
+  subtitleTh?: string;
   metaDescription: string;
+  metaDescriptionTh?: string;
   hero: {
     title: string;
+    titleTh?: string;
     description: string;
+    descriptionTh?: string;
     image?: string;
   };
   sections: PageSection[];
@@ -77,14 +100,32 @@ export interface SiteSettings {
     title: string;
     description: string;
   };
+  // GitHub Integration
+  githubToken?: string;
+  githubOwner?: string;
+  githubRepo?: string;
+  githubBranch?: string;
+  // Vercel Integration
+  vercelDeployHook?: string;
 }
 
 // Testimonial Type
 export interface Testimonial {
   id: string;
   quote: string;
+  quoteTh?: string;
   author: string;
   role?: string;
+  roleTh?: string;
   company?: string;
   rating?: number;
+}
+
+// Language Type
+export type Language = 'en' | 'th';
+
+// Bilingual Content Helper Type
+export interface BilingualContent {
+  en: string;
+  th: string;
 }
