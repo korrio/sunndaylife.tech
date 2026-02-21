@@ -7,9 +7,18 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
   t: (en: string, th?: string) => string;
+  isLoaded: boolean;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const defaultContext: LanguageContextType = {
+  language: 'en',
+  setLanguage: () => {},
+  toggleLanguage: () => {},
+  t: (en: string) => en,
+  isLoaded: false,
+};
+
+const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 const STORAGE_KEY = 'sunnyday_language';
 
@@ -48,13 +57,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return en;
   };
 
-  // Prevent hydration mismatch by not rendering until loaded
-  if (!isLoaded) {
-    return <>{children}</>;
-  }
-
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t, isLoaded }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -62,9 +66,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
-  if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
-  }
   return context;
 }
 
